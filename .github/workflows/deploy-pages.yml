@@ -2,6 +2,8 @@ name: Pubblica il sito
 
 # Da copiare nel repository del sito (quello con manifest.json e i pacchetti runtime), in .github/workflows.
 # Si attiva da solo a ogni push sul ramo main (la pubblicazione dei pacchetti fa un push) o a mano.
+# Gli add-in (cartelle AddIns e Servizi) possono essere caricati a mano: prima del controllo l'elenco "addIns" del manifest
+# viene ricalcolato dai file presenti, senza aspettare una nuova costruzione dei pacchetti. Il manifest nel repository non cambia.
 # Prima di pubblicare controlla che il sito contenga solo pacchetti runtime e che i file coincidano con il manifest:
 # se un pacchetto ha i sorgenti, o un file non corrisponde, il sito non viene aggiornato.
 # In Settings > Pages scegliere Source = GitHub Actions. L'environment "github-pages" permette di aggiungere un'approvazione.
@@ -27,6 +29,29 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v6
+
+      - name: List the add-ins in the manifest
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (Test-Path -LiteralPath manifest.json)) { return }
+          $manifest = Get-Content -LiteralPath manifest.json -Raw | ConvertFrom-Json
+          $addIns = @()
+          foreach ($folderName in 'AddIns', 'Servizi') {
+              if (-not (Test-Path -LiteralPath $folderName -PathType Container)) { continue }
+              foreach ($file in @(Get-ChildItem -LiteralPath $folderName -Filter *.exe -File)) {
+                  if ($file.Name -notmatch '^[A-Za-z0-9 _.&+()-]+\.exe$') { Write-Host "::warning::$folderName/$($file.Name): nome non valido, ignorato."; continue }
+                  $addIns += [pscustomobject]@{
+                      name   = $file.BaseName
+                      path   = '{0}/{1}' -f $folderName, $file.Name
+                      sha256 = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash
+                      size   = $file.Length
+                  }
+              }
+          }
+          $manifest | Add-Member -NotePropertyName addIns -NotePropertyValue @($addIns) -Force
+          $manifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath manifest.json -Encoding UTF8
+          Write-Host "Add-in nel manifest: $($addIns.Count)."
 
       - name: Check the site
         shell: pwsh
