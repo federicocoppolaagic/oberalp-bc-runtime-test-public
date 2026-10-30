@@ -1,0 +1,64 @@
+{
+  "apps": [
+    {
+      "name": "AGIC Extension & OAuth2.0 Management",
+      "publisher": "AGIC",
+      "id": "30f233c2-82cf-4adf-a83b-6341178b565b",
+      "version": "1.0.1.14",
+      "application": "24.0.0.0",
+      "platform": "24.0.0.0",
+      "bcVersion": "24",
+      "path": "AGIC Extension & OAuth2.0 Management/24/AGIC_AGIC Extension & OAuth2.0 Management_1.0.1.14.app",
+      "sha256": "9C9D04E6E0E17C3BEB23CB2E53AC2C7C495E51397BB388907960869F8D19DE63",
+      "size": 150381,
+      "dependencies": []
+    },
+    {
+      "name": "PITECO Connect",
+      "publisher": "AGIC",
+      "id": "f7c4dc4c-dbe9-46c3-ae81-23771de81978",
+      "version": "1.0.0.0",
+      "application": "24.0.0.0",
+      "platform": "1.0.0.0",
+      "bcVersion": "24",
+      "path": "PITECO Connect/24/AGIC_PITECO Connect_1.0.0.0.app",
+      "sha256": "AAEEC2BD14E2AFE2D399C084EF83A02537D6AF62D7CA4F459AB77833B8115012",
+      "size": 629676,
+      "dependencies": [
+        {
+          "Id": "30f233c2-82cf-4adf-a83b-6341178b565b",
+          "Name": "AGIC Extension & OAuth2.0 Management",
+          "Publisher": "AGIC",
+          "Version": "1.0.1.14"
+        }
+      ]
+    },
+    {
+      "name": "PITECO Connect Extended",
+      "publisher": "AGIC",
+      "id": "eff26acc-40e9-43d4-9d39-58053f6cb37b",
+      "version": "1.0.0.0",
+      "application": "24.0.0.0",
+      "platform": "1.0.0.0",
+      "bcVersion": "24",
+      "path": "PITECO Connect Extended/24/AGIC_PITECO Connect Extended_1.0.0.0.app",
+      "sha256": "C4BED4DFA162204451DF40A256D384B1BAC42F657397C7A1594379698F096DE1",
+      "size": 26544,
+      "dependencies": [
+        {
+          "Id": "f7c4dc4c-dbe9-46c3-ae81-23771de81978",
+          "Name": "PITECO Connect",
+          "Publisher": "AGIC",
+          "Version": "1.0.0.0"
+        },
+        {
+          "Id": "30f233c2-82cf-4adf-a83b-6341178b565b",
+          "Name": "AGIC Extension & OAuth2.0 Management",
+          "Publisher": "AGIC",
+          "Version": "1.0.1.14"
+        }
+      ]
+    }
+  ],
+  "addIns": []
+}
