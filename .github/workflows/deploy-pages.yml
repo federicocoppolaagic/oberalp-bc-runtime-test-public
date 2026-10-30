@@ -1,0 +1,75 @@
+name: Pubblica il sito
+
+# Da copiare nel repository del sito (quello con manifest.json e i pacchetti runtime), in .github/workflows.
+# Si attiva da solo a ogni push sul ramo main (la pubblicazione dei pacchetti fa un push) o a mano.
+# Prima di pubblicare controlla che il sito contenga solo pacchetti runtime e che i file coincidano con il manifest:
+# se un pacchetto ha i sorgenti, o un file non corrisponde, il sito non viene aggiornato.
+# In Settings > Pages scegliere Source = GitHub Actions. L'environment "github-pages" permette di aggiungere un'approvazione.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check the site
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $problems = New-Object System.Collections.Generic.List[string]
+          if (-not (Test-Path -LiteralPath manifest.json)) { throw 'manifest.json non trovato: nel sito non ci sono pacchetti pubblicati.' }
+          $manifest = Get-Content -LiteralPath manifest.json -Raw | ConvertFrom-Json
+
+          # Nessun sorgente AL in tutto il sito.
+          $sources = @(Get-ChildItem -Recurse -File -Filter *.al | Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' })
+          foreach ($file in $sources) { $problems.Add("File sorgente nel sito: $($file.FullName)") }
+
+          foreach ($app in @($manifest.apps)) {
+              if (-not $app) { continue }
+              $path = [string]$app.path
+              if ($path.Contains('..') -or -not (Test-Path -LiteralPath $path)) { $problems.Add("Pacchetto mancante: $path"); continue }
+              if ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ne [string]$app.sha256) { $problems.Add("L'impronta di $path non coincide con il manifest.") }
+              # Un pacchetto runtime non e' uno zip: dopo i 40 byte dell'intestazione NAVX c'e' il marcatore .NEA.
+              $stream = [IO.File]::OpenRead((Resolve-Path -LiteralPath $path).Path)
+              try { $buffer = New-Object byte[] 44; $read = $stream.Read($buffer, 0, 44) } finally { $stream.Dispose() }
+              $isRuntime = $read -ge 44 -and [Text.Encoding]::ASCII.GetString($buffer, 0, 4) -eq 'NAVX' -and [Text.Encoding]::ASCII.GetString($buffer, 40, 4) -eq '.NEA'
+              if (-not $isRuntime) { $problems.Add("$path non e' un pacchetto runtime (potrebbe contenere i sorgenti).") }
+          }
+
+          foreach ($addIn in @($manifest.PSObject.Properties['addIns'].Value)) {
+              if (-not $addIn) { continue }
+              $path = [string]$addIn.path
+              if ($path.Contains('..') -or -not (Test-Path -LiteralPath $path)) { $problems.Add("Add-in mancante: $path"); continue }
+              if ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ne [string]$addIn.sha256) { $problems.Add("L'impronta di $path non coincide con il manifest.") }
+          }
+
+          if ($problems.Count -gt 0) {
+              $problems | ForEach-Object { Write-Host "::error::$_" }
+              throw "Il sito non e' stato pubblicato: $($problems.Count) problema/i."
+          }
+          Write-Host "Controllo superato: $(@($manifest.apps).Count) pacchetti."
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
