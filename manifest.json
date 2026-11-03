@@ -22,8 +22,8 @@
       "platform": "1.0.0.0",
       "bcVersion": "24",
       "path": "PITECO Connect/24/AGIC_PITECO Connect_1.0.0.0.app",
-      "sha256": "AAEEC2BD14E2AFE2D399C084EF83A02537D6AF62D7CA4F459AB77833B8115012",
-      "size": 629676,
+      "sha256": "BA1FC416AF6B29A8339285166E8F641FED81F34314DAD9ABBB944362E847C25C",
+      "size": 634491,
       "dependencies": [
         {
           "Id": "30f233c2-82cf-4adf-a83b-6341178b565b",
@@ -60,5 +60,18 @@
       ]
     }
   ],
-  "addIns": []
+  "addIns": [
+    {
+      "name": "Agic Services Setup 1.7.1",
+      "path": "Servizi/Agic Services Setup 1.7.1.exe",
+      "sha256": "B669641D3F39D907808EE8712B8236C0D74BE87DE33D7FE081DC3C30069FAE30",
+      "size": 6637192
+    },
+    {
+      "name": "Agic Services Setup 1.7.2",
+      "path": "Servizi/Agic Services Setup 1.7.2.exe",
+      "sha256": "D0723B1FB74F4747EA1937AE73FD123DBBE97D4AFF18CF8045C70828CB89F377",
+      "size": 6638486
+    }
+  ]
 }
