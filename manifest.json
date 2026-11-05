@@ -42,8 +42,8 @@
       "platform": "1.0.0.0",
       "bcVersion": "24",
       "path": "PITECO Connect Extended/24/AGIC_PITECO Connect Extended_1.0.0.0.app",
-      "sha256": "C4BED4DFA162204451DF40A256D384B1BAC42F657397C7A1594379698F096DE1",
-      "size": 26544,
+      "sha256": "11D135E8FEFF6EE72867749E7F48E15C56D528038071E67EA8427DC2D943F387",
+      "size": 26505,
       "dependencies": [
         {
           "Id": "f7c4dc4c-dbe9-46c3-ae81-23771de81978",
